@@ -26,8 +26,8 @@ class DatasetBundle:
             )
         elif self.dataset_name == "imdb":
             return (
-                f"{system_prompt}\nReview: {example['question']}\n"
-                "Classify the sentiment as positive (1) or negative (0)."
+                f"{system_prompt}\nReview: {example['text']}\n"
+                "Classify the sentiment as positive or negative."
             )
         return (
             f"{system_prompt}\nQuestion: {example['question']}\n"
@@ -74,10 +74,10 @@ def extract_metadata_gsm8k(example: Dict, length_median: int, numeral_median: in
 def extract_metadata_imdb(example: Dict, length_median: int) -> np.ndarray:
     text = example["text"]
     length_bin = int(len(text.split()) >= length_median)
-    # Additional simple features for sentiment analysis
     has_exclamation = int("!" in text)
     has_question = int("?" in text)
-    return np.array([length_bin, has_exclamation, has_question, 0], dtype=np.int64)
+    has_caps = int(any(word.isupper() and len(word) > 1 for word in text.split()))
+    return np.array([length_bin, has_exclamation, has_question, has_caps], dtype=np.int64)
 
 
 def load_dataset_bundle(cfg) -> DatasetBundle:
@@ -137,10 +137,9 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
         for ex in data:
             processed.append(
                 {
-                    "question": ex["text"],
                     "text": ex["text"],
                     "label": str(ex["label"]),
-                    "label_binary": int(ex["label"] in [0, 1]),
+                    "label_binary": int(ex["label"] == 1),
                     "metadata": extract_metadata_imdb(
                         {"text": ex["text"]},
                         length_median,
@@ -151,10 +150,9 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
         for ex in test:
             test_processed.append(
                 {
-                    "question": ex["text"],
                     "text": ex["text"],
                     "label": str(ex["label"]),
-                    "label_binary": int(ex["label"] in [0, 1]),
+                    "label_binary": int(ex["label"] == 1),
                     "metadata": extract_metadata_imdb(
                         {"text": ex["text"]},
                         length_median,
@@ -204,28 +202,21 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
 
     n = len(processed)
 
-    # Handle different split configurations
+    # Handle both split_ratios (percentages) and splits (absolute numbers)
     if hasattr(cfg.dataset, 'split_ratios') and cfg.dataset.split_ratios is not None:
-        # Old approach: split_ratios with percentages
         n_train = int(n * cfg.dataset.split_ratios.train)
         n_val = int(n * cfg.dataset.split_ratios.val)
-        train = processed[:n_train]
-        val = processed[n_train : n_train + n_val]
     elif hasattr(cfg.dataset, 'splits') and cfg.dataset.splits is not None:
-        # New approach: splits with absolute counts
-        splits = cfg.dataset.splits
-        n_feedback_dev = splits.get("feedback_dev", 0)
-        n_anchor_pool = splits.get("anchor_pool", 0)
-        # Use feedback_dev as validation set and anchor_pool as training set
-        val = processed[:n_feedback_dev]
-        train = processed[n_feedback_dev : n_feedback_dev + n_anchor_pool]
+        # For splits configuration, use feedback_dev for training, anchor_pool for validation
+        n_train = cfg.dataset.splits.get('feedback_dev', int(n * 0.6))
+        n_val = cfg.dataset.splits.get('anchor_pool', int(n * 0.2))
     else:
-        # Default fallback: use simple 80/20 split
-        n_train = int(n * 0.8)
-        n_val = int(n * 0.1)
-        train = processed[:n_train]
-        val = processed[n_train : n_train + n_val]
+        # Default split ratios if neither is provided
+        n_train = int(n * 0.6)
+        n_val = int(n * 0.2)
 
+    train = processed[:n_train]
+    val = processed[n_train : n_train + n_val]
     test = test_processed
 
     metadata_dim = len(train[0]["metadata"]) if train else 0

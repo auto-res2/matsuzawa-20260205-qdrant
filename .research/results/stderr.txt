@@ -369,8 +369,8 @@ A decoder-only architecture is being used, but right-padding was detected! For c
 A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
 Using CPython 3.11.14
 Creating virtual environment at: .venv
-Resolved 107 packages in 510ms
-Installed 94 packages in 291ms
+Resolved 107 packages in 137ms
+Installed 94 packages in 295ms
  + aiohappyeyeballs==2.6.1
  + aiohttp==3.13.3
  + aiosignal==1.4.0
@@ -465,9 +465,8 @@ Installed 94 packages in 291ms
  + wandb==0.24.2
  + xxhash==3.6.0
  + yarl==1.22.0
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Generating train split:   0%|          | 0/7473 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 7473/7473 [00:00<00:00, 456717.04 examples/s]
-Generating test split:   0%|          | 0/1319 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 1319/1319 [00:00<00:00, 378120.91 examples/s]
+Generating train split:   0%|          | 0/7473 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 7473/7473 [00:00<00:00, 249296.38 examples/s]
+Generating test split:   0%|          | 0/1319 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 1319/1319 [00:00<00:00, 244758.97 examples/s]
 Error executing job with overrides: ['run=comparative-1-qwen3-1.7b-imdb', 'results_dir=.research/results', 'mode=full']
 Traceback (most recent call last):
   File "/workspace/actions-runner/_work/matsuzawa-20260205-qdrant/matsuzawa-20260205-qdrant/src/main.py", line 86, in main
