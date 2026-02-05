@@ -2,6 +2,7 @@ defaults:
   - optional run: null
   - _self_
 
+run: null
 mode: full
 results_dir: ./results
 
