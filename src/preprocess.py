@@ -24,6 +24,11 @@ class DatasetBundle:
                 f"{system_prompt}\nQuestion: {example['question']}\n"
                 f"Choices:\n{choices}\nAnswer with a single letter (A/B/C/D)."
             )
+        elif self.dataset_name == "imdb":
+            return (
+                f"{system_prompt}\nReview: {example['question']}\n"
+                "Classify the sentiment as positive (1) or negative (0)."
+            )
         return (
             f"{system_prompt}\nQuestion: {example['question']}\n"
             "Provide the final numeric answer only."
@@ -64,6 +69,15 @@ def extract_metadata_gsm8k(example: Dict, length_median: int, numeral_median: in
     numeral_bin = int(numeral_count >= numeral_median)
     has_dollar = int("$" in text)
     return np.array([length_bin, numeral_bin, has_dollar, 0], dtype=np.int64)
+
+
+def extract_metadata_imdb(example: Dict, length_median: int) -> np.ndarray:
+    text = example["text"]
+    length_bin = int(len(text.split()) >= length_median)
+    # Additional simple features for sentiment analysis
+    has_exclamation = int("!" in text)
+    has_question = int("?" in text)
+    return np.array([length_bin, has_exclamation, has_question, 0], dtype=np.int64)
 
 
 def load_dataset_bundle(cfg) -> DatasetBundle:
@@ -110,6 +124,43 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
                     ),
                 }
             )
+    elif cfg.dataset.name == "imdb":
+        raw = load_dataset("imdb", cache_dir=".cache/")
+        data = raw["train"].shuffle(seed=cfg.training.seed)
+        test = raw["test"].shuffle(seed=cfg.training.seed)
+        if max_samples:
+            data = data.select(range(min(len(data), max_samples)))
+            test = test.select(range(min(len(test), max_samples)))
+        texts = [ex["text"] for ex in data]
+        length_median = int(np.median([len(t.split()) for t in texts]))
+        processed = []
+        for ex in data:
+            processed.append(
+                {
+                    "question": ex["text"],
+                    "text": ex["text"],
+                    "label": str(ex["label"]),
+                    "label_binary": int(ex["label"] in [0, 1]),
+                    "metadata": extract_metadata_imdb(
+                        {"text": ex["text"]},
+                        length_median,
+                    ),
+                }
+            )
+        test_processed = []
+        for ex in test:
+            test_processed.append(
+                {
+                    "question": ex["text"],
+                    "text": ex["text"],
+                    "label": str(ex["label"]),
+                    "label_binary": int(ex["label"] in [0, 1]),
+                    "metadata": extract_metadata_imdb(
+                        {"text": ex["text"]},
+                        length_median,
+                    ),
+                }
+            )
     else:
         raw = load_dataset("gsm8k", "main", cache_dir=".cache/")
         data = raw["train"].shuffle(seed=cfg.training.seed)
@@ -152,10 +203,29 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
             )
 
     n = len(processed)
-    n_train = int(n * cfg.dataset.split_ratios.train)
-    n_val = int(n * cfg.dataset.split_ratios.val)
-    train = processed[:n_train]
-    val = processed[n_train : n_train + n_val]
+
+    # Handle different split configurations
+    if hasattr(cfg.dataset, 'split_ratios') and cfg.dataset.split_ratios is not None:
+        # Old approach: split_ratios with percentages
+        n_train = int(n * cfg.dataset.split_ratios.train)
+        n_val = int(n * cfg.dataset.split_ratios.val)
+        train = processed[:n_train]
+        val = processed[n_train : n_train + n_val]
+    elif hasattr(cfg.dataset, 'splits') and cfg.dataset.splits is not None:
+        # New approach: splits with absolute counts
+        splits = cfg.dataset.splits
+        n_feedback_dev = splits.get("feedback_dev", 0)
+        n_anchor_pool = splits.get("anchor_pool", 0)
+        # Use feedback_dev as validation set and anchor_pool as training set
+        val = processed[:n_feedback_dev]
+        train = processed[n_feedback_dev : n_feedback_dev + n_anchor_pool]
+    else:
+        # Default fallback: use simple 80/20 split
+        n_train = int(n * 0.8)
+        n_val = int(n * 0.1)
+        train = processed[:n_train]
+        val = processed[n_train : n_train + n_val]
+
     test = test_processed
 
     metadata_dim = len(train[0]["metadata"]) if train else 0
