@@ -1,0 +1,44 @@
+defaults:
+  - run: null
+  - _self_
+
+mode: full
+results_dir: ./results
+
+wandb:
+  entity: airas
+  project: 2026-02-05-2
+  mode: online
+
+training:
+  seed: 42
+  learning_rate: 1.0e-5
+  batch_size: 8
+  epochs: 1
+  optimizer: adamw
+  warmup_steps: 0
+  max_grad_norm: 1.0
+  eval_only: true
+
+optimization:
+  iterations: 40
+  candidates_per_iter: 24
+  top_k: 16
+  race_n0: 24
+  race_n1: 96
+  promote_M: 6
+  delta_total: 0.05
+  delta: 0.05
+  slice_family: single_feature
+  cs_type: stitched_hoeffding
+  lcb_type: normal_approx
+
+primary_metric: worst_group_accuracy
+
+evaluation:
+  coverage_checks: 5
+  coverage_batch: 64
+
+optuna:
+  n_trials: 20
+  search_spaces: []

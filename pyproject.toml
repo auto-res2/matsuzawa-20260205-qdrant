@@ -1,1 +1,23 @@
-# Please list the required python packages.
+[project]
+name = "savr-opro"
+version = "0.1.0"
+description = "SAVR-OPRO prompt optimization experiments"
+requires-python = ">=3.10"
+
+dependencies = [
+  "hydra-core>=1.3.2",
+  "omegaconf>=2.3.0",
+  "torch>=2.2.0",
+  "transformers>=4.48.0",
+  "datasets>=3.1.0",
+  "wandb>=0.17.0",
+  "optuna>=3.6.0",
+  "numpy>=1.26.0",
+  "pandas>=2.2.0",
+  "matplotlib>=3.8.0",
+  "seaborn>=0.13.0",
+  "scipy>=1.12.0",
+]
+
+[tool.hydra]
+run = { dir = "." }

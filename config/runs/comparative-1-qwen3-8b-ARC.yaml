@@ -1,0 +1,45 @@
+run_id: comparative-1-qwen3-8b-ARC
+method: Naive-Racing OPRO (mean-accuracy + fixed-time LCB)
+model:
+  name: Qwen3-8B
+  parameters: 8B
+  inference_only: true
+dataset:
+  name: ARC
+  split_ratios:
+    train: 0.8
+    val: 0.1
+    test: 0.1
+  preprocessing:
+    max_length: 1024
+    answer_extraction: multiple_choice_letter
+training:
+  learning_rate: 1.0e-5
+  batch_size: 8
+  epochs: 1
+  optimizer: adamw
+  warmup_steps: 0
+  max_grad_norm: 1.0
+  eval_only: true
+optuna:
+  n_trials: 20
+  search_spaces:
+    - param_name: race_n0
+      distribution_type: int
+      low: 12
+      high: 48
+    - param_name: race_n1
+      distribution_type: int
+      low: 48
+      high: 192
+    - param_name: promote_M
+      distribution_type: int
+      low: 4
+      high: 10
+    - param_name: lcb_type
+      distribution_type: categorical
+      choices: [normal_approx, fixed_hoeffding]
+    - param_name: delta
+      distribution_type: loguniform
+      low: 0.001
+      high: 0.1
