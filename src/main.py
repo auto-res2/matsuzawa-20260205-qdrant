@@ -1,6 +1,7 @@
 import json
-import yaml
 from pathlib import Path
+
+import yaml
 from hydra import main as hydra_main
 from omegaconf import DictConfig, OmegaConf
 
@@ -15,10 +16,23 @@ def main(cfg: DictConfig) -> None:
     elif cfg.mode == "full":
         cfg.wandb.mode = "online"
 
+    # Load run configuration from research_history.json if run is specified as a string
+    if hasattr(cfg, 'run') and cfg.run is not None and isinstance(cfg.run, str):
+        research_history_path = Path(".research/research_history.json")
+        if research_history_path.exists():
+            with open(research_history_path, 'r') as f:
+                research_history = json.load(f)
+
+            # The run configs are stored in experiment_code.run_configs
+            run_configs = research_history.get("experiment_code", {}).get("run_configs", {})
+            if cfg.run in run_configs:
+                run_yaml_str = run_configs[cfg.run]
+                run_config = yaml.safe_load(run_yaml_str)
+                cfg.run = OmegaConf.create(run_config)
+
     # Merge the run configuration into the main config if it exists
-    run_config_loaded = False
     if hasattr(cfg, 'run') and cfg.run is not None and not isinstance(cfg.run, str):
-        # Override config values with run-specific settings from Hydra
+        # Override config values with run-specific settings
         for key in ['model', 'dataset', 'training', 'optuna']:
             if key in cfg.run:
                 cfg[key] = OmegaConf.merge(cfg.get(key, {}), cfg.run[key])
