@@ -31,7 +31,10 @@ def main(cfg: DictConfig) -> None:
                 cfg.run = OmegaConf.create(run_config)
 
     # Merge the run configuration into the main config if it exists
+    run_config_loaded = False
     if hasattr(cfg, 'run') and cfg.run is not None and not isinstance(cfg.run, str):
+        # Set struct mode to False to allow adding new keys
+        OmegaConf.set_struct(cfg, False)
         # Override config values with run-specific settings
         for key in ['model', 'dataset', 'training', 'optuna']:
             if key in cfg.run:
@@ -71,6 +74,8 @@ def main(cfg: DictConfig) -> None:
             # Parse and merge the run config if found
             if run_config_yaml:
                 run_config = yaml.safe_load(run_config_yaml)
+                # Set struct mode to False to allow adding new keys
+                OmegaConf.set_struct(cfg, False)
                 for key in ['model', 'dataset', 'training', 'optuna']:
                     if key in run_config:
                         cfg[key] = OmegaConf.merge(cfg.get(key, {}), OmegaConf.create(run_config[key]))
