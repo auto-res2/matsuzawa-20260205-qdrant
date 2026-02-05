@@ -1,3 +1,4 @@
+# @package run
 run_id: comparative-1-qwen3-4b-ARC
 method: Naive-Racing OPRO (mean-accuracy + fixed-time LCB)
 model:

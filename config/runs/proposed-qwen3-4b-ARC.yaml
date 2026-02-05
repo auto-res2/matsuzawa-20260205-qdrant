@@ -1,3 +1,4 @@
+# @package run
 run_id: proposed-qwen3-4b-ARC
 method: SAVR-OPRO (Slice-Adaptive, Anytime-Valid Racing)
 model:
