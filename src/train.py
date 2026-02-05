@@ -92,14 +92,27 @@ def evaluate_candidate_race(
     stage2: bool,
     batch_size: int,
 ) -> Tuple[np.ndarray, np.ndarray, int]:
-    val_samples = dataset.sample_val(n0)
-    prompts = [dataset.format_prompt(prompt, ex) for ex in val_samples]
-    labels = [ex["label"] for ex in val_samples]
-    preds = model.generate_batch(prompts, batch_size=batch_size)
-    assert len(preds) == len(labels), "Prediction/label length mismatch"
-    y = np.array([int(p == y) for p, y in zip(preds, labels)], dtype=np.int64)
-    z = np.stack([ex["metadata"] for ex in val_samples], axis=0)
-    used = n0
+    if n0 > 0:
+        val_samples = dataset.sample_val(n0)
+        prompts = [dataset.format_prompt(prompt, ex) for ex in val_samples]
+        labels = [ex["label"] for ex in val_samples]
+        preds = model.generate_batch(prompts, batch_size=batch_size)
+        assert len(preds) == len(labels), "Prediction/label length mismatch"
+        y = np.array([int(p == y) for p, y in zip(preds, labels)], dtype=np.int64)
+        z = np.stack([ex["metadata"] for ex in val_samples], axis=0)
+        used = n0
+    else:
+        # Initialize empty arrays with correct shape when n0=0
+        y = np.array([], dtype=np.int64)
+        # Get metadata shape from a single sample
+        sample_meta = dataset.sample_val(1)
+        if sample_meta:
+            meta_shape = sample_meta[0]["metadata"].shape
+            z = np.empty((0,) + meta_shape, dtype=sample_meta[0]["metadata"].dtype)
+        else:
+            z = np.array([])
+        used = 0
+
     if stage2 and n1 > 0:
         val_samples2 = dataset.sample_val(n1)
         prompts2 = [dataset.format_prompt(prompt, ex) for ex in val_samples2]
@@ -107,8 +120,8 @@ def evaluate_candidate_race(
         preds2 = model.generate_batch(prompts2, batch_size=batch_size)
         y2 = np.array([int(p == y) for p, y in zip(preds2, labels2)], dtype=np.int64)
         z2 = np.stack([ex["metadata"] for ex in val_samples2], axis=0)
-        y = np.concatenate([y, y2])
-        z = np.concatenate([z, z2])
+        y = np.concatenate([y, y2]) if y.size > 0 else y2
+        z = np.concatenate([z, z2]) if z.size > 0 else z2
         used += n1
     return y, z, used
 
