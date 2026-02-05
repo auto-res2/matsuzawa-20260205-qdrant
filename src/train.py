@@ -323,7 +323,8 @@ def run(cfg: DictConfig) -> None:
         cfg.optimization.candidates_per_iter = min(cfg.optimization.candidates_per_iter, 2)
         cfg.optimization.race_n0 = min(cfg.optimization.race_n0, 4)
         cfg.optimization.race_n1 = min(cfg.optimization.race_n1, 8)
-        cfg.dataset.max_samples = min(cfg.dataset.get("max_samples", 128), 64)
+        if "dataset" in cfg:
+            cfg.dataset.max_samples = min(cfg.dataset.get("max_samples", 128), 64)
 
     set_seed(cfg.training.seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
