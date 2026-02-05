@@ -82,3 +82,87 @@
 [2026-02-05 10:02:00,011][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
 === [TRIAL RUN] PASSED for comparative-1-qwen3-4b-ARC at Thu Feb  5 10:02:02 UTC 2026 ===
 
+=== [UV SYNC] Start at Thu Feb  5 10:05:12 UTC 2026 ===
+=== [UV SYNC] Finished successfully at Thu Feb  5 10:05:13 UTC 2026 ===
+=== [TRIAL RUN] Start for proposed-qwen3-4b-ARC at Thu Feb  5 10:05:13 UTC 2026 ===
+[2026-02-05 10:05:26,331][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:26,510][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:26,521][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/allenai/ai2_arc/210d026faf9955653af8916fad021475a3f00453/README.md "HTTP/1.1 200 OK"
+[2026-02-05 10:05:26,534][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/datasets/allenai/ai2_arc/210d026faf9955653af8916fad021475a3f00453/README.md "HTTP/1.1 200 OK"
+[2026-02-05 10:05:26,717][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ai2_arc.py "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:26,915][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ai2_arc.py "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:27,491][httpx][INFO] - HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/ai2_arc/ai2_arc.py "HTTP/1.1 200 OK"
+[2026-02-05 10:05:27,715][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/ai2_arc/revision/210d026faf9955653af8916fad021475a3f00453 "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:27,897][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/allenai/ai2_arc/revision/210d026faf9955653af8916fad021475a3f00453 "HTTP/1.1 200 OK"
+[2026-02-05 10:05:28,092][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/.huggingface.yaml "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:28,295][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/.huggingface.yaml "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:28,532][httpx][INFO] - HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=ai2_arc "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:28,720][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/ai2_arc/tree/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:28,905][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/allenai/ai2_arc/tree/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge?recursive=true&expand=false "HTTP/1.1 200 OK"
+[2026-02-05 10:05:29,089][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/ai2_arc/tree/210d026faf9955653af8916fad021475a3f00453?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:29,268][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/allenai/ai2_arc/tree/210d026faf9955653af8916fad021475a3f00453?recursive=false&expand=false "HTTP/1.1 200 OK"
+[2026-02-05 10:05:29,464][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/dataset_infos.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:29,639][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/dataset_infos.json "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:30,116][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge/train-00000-of-00001.parquet "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:30,298][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge/train-00000-of-00001.parquet "HTTP/1.1 302 Found"
+[2026-02-05 10:05:30,486][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/allenai/ai2_arc/xet-read-token/210d026faf9955653af8916fad021475a3f00453 "HTTP/1.1 200 OK"
+[2026-02-05 10:05:32,078][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge/test-00000-of-00001.parquet "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:32,259][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge/test-00000-of-00001.parquet "HTTP/1.1 302 Found"
+[2026-02-05 10:05:32,891][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge/validation-00000-of-00001.parquet "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:33,081][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/allenai/ai2_arc/resolve/210d026faf9955653af8916fad021475a3f00453/ARC-Challenge/validation-00000-of-00001.parquet "HTTP/1.1 302 Found"
+[2026-02-05 10:05:33,816][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:33,817][huggingface_hub.utils._http][WARNING] - Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[2026-02-05 10:05:33,825][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:33,835][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:34,016][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:34,026][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/tokenizer_config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:34,037][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/tokenizer_config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:34,226][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-3B-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:34,405][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-3B-Instruct/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+[2026-02-05 10:05:34,731][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/vocab.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:34,742][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/vocab.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:34,753][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/vocab.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:34,991][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/merges.txt "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:34,999][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/merges.txt "HTTP/1.1 200 OK"
+[2026-02-05 10:05:35,008][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/merges.txt "HTTP/1.1 200 OK"
+[2026-02-05 10:05:35,217][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:35,228][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/tokenizer.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:35,239][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/tokenizer.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:35,504][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/added_tokens.json "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:35,684][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/special_tokens_map.json "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:35,873][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/chat_template.jinja "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:36,582][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-3B-Instruct "HTTP/1.1 200 OK"
+[2026-02-05 10:05:36,759][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:36,770][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:37,874][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/model.safetensors "HTTP/1.1 404 Not Found"
+[2026-02-05 10:05:38,052][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/model.safetensors.index.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:38,061][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/model.safetensors.index.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:38,071][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/model.safetensors.index.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:38,260][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-3B-Instruct/revision/main "HTTP/1.1 200 OK"
+[2026-02-05 10:05:38,467][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/aa8e72537993ba99e69dfaafa59ed015b17504d1/model-00001-of-00002.safetensors "HTTP/1.1 302 Found"
+[2026-02-05 10:05:38,469][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/aa8e72537993ba99e69dfaafa59ed015b17504d1/model-00002-of-00002.safetensors "HTTP/1.1 302 Found"
+[2026-02-05 10:05:38,641][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-3B-Instruct/xet-read-token/aa8e72537993ba99e69dfaafa59ed015b17504d1 "HTTP/1.1 200 OK"
+[2026-02-05 10:05:38,649][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-3B-Instruct/xet-read-token/aa8e72537993ba99e69dfaafa59ed015b17504d1 "HTTP/1.1 200 OK"
+[2026-02-05 10:05:44,799][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-3B-Instruct/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:05:44,807][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/generation_config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:44,891][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-3B-Instruct/aa8e72537993ba99e69dfaafa59ed015b17504d1/generation_config.json "HTTP/1.1 200 OK"
+[2026-02-05 10:05:46,459][transformers.generation.configuration_utils][WARNING] - The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[2026-02-05 10:05:46,523][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:47,641][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:48,326][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:49,033][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:49,723][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:50,431][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:51,135][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:51,845][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:52,547][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:53,246][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:53,947][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:54,649][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:55,346][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:56,034][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:56,722][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:57,408][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+[2026-02-05 10:05:58,099][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
+=== [TRIAL RUN] PASSED for proposed-qwen3-4b-ARC at Thu Feb  5 10:06:00 UTC 2026 ===
+
