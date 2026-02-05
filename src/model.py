@@ -3,7 +3,7 @@ import re
 from typing import List
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoTokenizer, AutoConfig
 
 
 MODEL_NAME_MAP = {
@@ -18,7 +18,17 @@ class LLMWrapper:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=".cache/")
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=".cache/")
+
+        # Determine if the model is a seq2seq (encoder-decoder) model
+        config = AutoConfig.from_pretrained(model_name, cache_dir=".cache/")
+        self.is_seq2seq = config.is_encoder_decoder if hasattr(config, 'is_encoder_decoder') else False
+
+        # Load the appropriate model type
+        if self.is_seq2seq:
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name, cache_dir=".cache/")
+        else:
+            self.model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir=".cache/")
+
         self.model.to(device)
         self.model.eval()
         self.device = device
@@ -31,12 +41,22 @@ class LLMWrapper:
             if inputs.input_ids.shape[0] > 0:
                 assert inputs.input_ids.shape[0] == inputs.attention_mask.shape[0]
             with torch.no_grad():
-                generated = self.model.generate(
-                    **inputs,
-                    max_new_tokens=max_new_tokens,
-                    do_sample=False,
-                    pad_token_id=self.tokenizer.pad_token_id,
-                )
+                if self.is_seq2seq:
+                    # For seq2seq models, generate from scratch (no input_ids in output)
+                    generated = self.model.generate(
+                        **inputs,
+                        max_new_tokens=max_new_tokens,
+                        do_sample=False,
+                        pad_token_id=self.tokenizer.pad_token_id,
+                    )
+                else:
+                    # For causal LM, generate includes the input tokens
+                    generated = self.model.generate(
+                        **inputs,
+                        max_new_tokens=max_new_tokens,
+                        do_sample=False,
+                        pad_token_id=self.tokenizer.pad_token_id,
+                    )
             decoded = self.tokenizer.batch_decode(generated, skip_special_tokens=True)
             outputs.extend([self._postprocess(d) for d in decoded])
         return outputs
