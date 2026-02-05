@@ -254,3 +254,29 @@
 [2026-02-05 10:07:33,081][transformers.generation.utils][WARNING] - A decoder-only architecture is being used, but right-padding was detected! For correct generation results, please set `padding_side='left'` when initializing the tokenizer.
 === [TRIAL RUN] PASSED for proposed-qwen3-8b-ARC at Thu Feb  5 10:07:34 UTC 2026 ===
 
+=== [UV SYNC] Start at Thu Feb  5 10:09:00 UTC 2026 ===
+=== [UV SYNC] Finished successfully at Thu Feb  5 10:09:31 UTC 2026 ===
+=== [FULL EXPERIMENT] Start for comparative-1-flan-t5-small-imdb at Thu Feb  5 10:09:31 UTC 2026 ===
+[2026-02-05 10:09:44,084][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/gsm8k/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:44,257][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/openai/gsm8k/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:44,266][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/openai/gsm8k/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/README.md "HTTP/1.1 200 OK"
+[2026-02-05 10:09:44,275][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/resolve-cache/datasets/openai/gsm8k/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/README.md "HTTP/1.1 200 OK"
+[2026-02-05 10:09:44,454][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/gsm8k.py "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:44,634][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/openai/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/gsm8k.py "HTTP/1.1 404 Not Found"
+[2026-02-05 10:09:45,254][httpx][INFO] - HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/gsm8k/gsm8k.py "HTTP/1.1 404 Not Found"
+[2026-02-05 10:09:45,441][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/gsm8k/revision/cc7b047b6e5bb11b4f1af84efc572db110a51b3c "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:45,619][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/openai/gsm8k/revision/cc7b047b6e5bb11b4f1af84efc572db110a51b3c "HTTP/1.1 200 OK"
+[2026-02-05 10:09:45,810][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/.huggingface.yaml "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:45,989][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/openai/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/.huggingface.yaml "HTTP/1.1 404 Not Found"
+[2026-02-05 10:09:46,204][httpx][INFO] - HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=gsm8k "HTTP/1.1 404 Not Found"
+[2026-02-05 10:09:46,392][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/gsm8k/tree/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:46,575][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/openai/gsm8k/tree/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+[2026-02-05 10:09:46,751][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/gsm8k/tree/cc7b047b6e5bb11b4f1af84efc572db110a51b3c?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:46,935][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/openai/gsm8k/tree/cc7b047b6e5bb11b4f1af84efc572db110a51b3c?recursive=false&expand=false "HTTP/1.1 200 OK"
+[2026-02-05 10:09:47,135][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/dataset_infos.json "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:47,310][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/openai/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/dataset_infos.json "HTTP/1.1 404 Not Found"
+[2026-02-05 10:09:47,792][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/main/train-00000-of-00001.parquet "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:47,969][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/openai/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/main/train-00000-of-00001.parquet "HTTP/1.1 302 Found"
+[2026-02-05 10:09:48,159][httpx][INFO] - HTTP Request: GET https://huggingface.co/api/datasets/openai/gsm8k/xet-read-token/cc7b047b6e5bb11b4f1af84efc572db110a51b3c "HTTP/1.1 200 OK"
+[2026-02-05 10:09:49,358][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/main/test-00000-of-00001.parquet "HTTP/1.1 307 Temporary Redirect"
+[2026-02-05 10:09:49,551][httpx][INFO] - HTTP Request: HEAD https://huggingface.co/datasets/openai/gsm8k/resolve/cc7b047b6e5bb11b4f1af84efc572db110a51b3c/main/test-00000-of-00001.parquet "HTTP/1.1 302 Found"

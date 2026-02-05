@@ -24,6 +24,11 @@ class DatasetBundle:
                 f"{system_prompt}\nQuestion: {example['question']}\n"
                 f"Choices:\n{choices}\nAnswer with a single letter (A/B/C/D)."
             )
+        elif self.dataset_name == "imdb":
+            return (
+                f"{system_prompt}\nReview: {example['question']}\n"
+                "Classify the sentiment as 0 (negative) or 1 (positive)."
+            )
         return (
             f"{system_prompt}\nQuestion: {example['question']}\n"
             "Provide the final numeric answer only."
@@ -110,6 +115,39 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
                     ),
                 }
             )
+    elif cfg.dataset.name == "imdb":
+        raw = load_dataset("imdb", cache_dir=".cache/")
+        data = raw["train"].shuffle(seed=cfg.training.seed)
+        test = raw["test"].shuffle(seed=cfg.training.seed)
+        if max_samples:
+            data = data.select(range(min(len(data), max_samples)))
+            test = test.select(range(min(len(test), max_samples)))
+        texts = [ex["text"] for ex in data]
+        length_median = int(np.median([len(t.split()) for t in texts]))
+        processed = []
+        for ex in data:
+            text_length = len(ex["text"].split())
+            length_bin = int(text_length >= length_median)
+            processed.append(
+                {
+                    "question": ex["text"],
+                    "label": str(ex["label"]),
+                    "label_binary": ex["label"],
+                    "metadata": np.array([length_bin, 0, 0, 0], dtype=np.int64),
+                }
+            )
+        test_processed = []
+        for ex in test:
+            text_length = len(ex["text"].split())
+            length_bin = int(text_length >= length_median)
+            test_processed.append(
+                {
+                    "question": ex["text"],
+                    "label": str(ex["label"]),
+                    "label_binary": ex["label"],
+                    "metadata": np.array([length_bin, 0, 0, 0], dtype=np.int64),
+                }
+            )
     else:
         raw = load_dataset("gsm8k", "main", cache_dir=".cache/")
         data = raw["train"].shuffle(seed=cfg.training.seed)
@@ -152,8 +190,17 @@ def load_dataset_bundle(cfg) -> DatasetBundle:
             )
 
     n = len(processed)
-    n_train = int(n * cfg.dataset.split_ratios.train)
-    n_val = int(n * cfg.dataset.split_ratios.val)
+    # Use split_ratios if provided, otherwise use defaults (80/20 split)
+    split_ratios = getattr(cfg.dataset, 'split_ratios', None)
+    if split_ratios:
+        train_ratio = split_ratios.train
+        val_ratio = split_ratios.val
+    else:
+        train_ratio = 0.8
+        val_ratio = 0.2
+
+    n_train = int(n * train_ratio)
+    n_val = int(n * val_ratio)
     train = processed[:n_train]
     val = processed[n_train : n_train + n_val]
     test = test_processed
