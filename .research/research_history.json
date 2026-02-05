@@ -1083,5 +1083,139 @@
     "experimental_code": "import numpy as np\n\n\ndef sigmoid(z):\n    return 1.0 / (1.0 + np.exp(-z))\n\n\ndef lcb_hoeffding(mean, n, delta=0.05):\n    # anytime-valid under optional stopping for bounded variables\n    rad = np.sqrt(np.log(2.0 / delta) / (2.0 * max(int(n), 1)))\n    return float(mean - rad)\n\n\nclass LatentSliceEnv:\n    \"\"\"Prompt x with observable metadata z; latent group g is a nontrivial function of z.\n\n    Optimization sees (y, z) only; evaluation can access g.\n    \"\"\"\n\n    def __init__(self, d=30, m=8, seed=0, pi_train=0.85, pi_test=0.70, spur_strength=0.25):\n        self.d, self.m = d, m\n        self.rng = np.random.default_rng(seed)\n        self.pi_train, self.pi_test = pi_train, pi_test\n        self.spur_strength = spur_strength\n\n        # group-specific true weights\n        self.w0 = self.rng.normal(0, 1, size=d)\n        self.w1 = self.rng.normal(0, 1, size=d)\n        self.b0 = -0.6 * np.linalg.norm(self.w0)\n        self.b1 = -0.6 * np.linalg.norm(self.w1)\n\n        # spurious prompt features (tempt overfitting)\n        self.spur = self.rng.choice(d, size=max(2, d // 6), replace=False)\n\n        # latent group definition: XOR of two metadata bits (not directly a single slice)\n        self.g_bits = (0, 1)\n\n    def sample_z(self, n, pi):\n        # metadata bit0 controls majority; others are balanced nuisance factors\n        z = self.rng.integers(0, 2, size=(n, self.m), dtype=np.int8)\n        z[:, 0] = (self.rng.random(n) < pi).astype(np.int8)\n        return z\n\n    def latent_g(self, z):\n        a, b = self.g_bits\n        return (z[:, a] ^ z[:, b]).astype(np.int8)\n\n    def p_correct(self, x, z, split):\n        x = np.asarray(x)\n        g = self.latent_g(z)\n        base0 = sigmoid(self.w0 @ x + self.b0)\n        base1 = sigmoid(self.w1 @ x + self.b1)\n        base = np.where(g == 0, base0, base1)\n\n        # spurious correlation: only strong in training, and correlates with majority-like metadata (z0=1)\n        spur = self.spur_strength * float(x[self.spur].mean())\n        maj = z[:, 0].astype(float)\n        if split == \"train\":\n            boost = spur * (0.9 * maj + 0.1 * (1 - maj))\n        else:\n            boost = spur * (0.15 * maj + 0.05 * (1 - maj))\n\n        return np.clip(base + boost, 0, 1)\n\n    def eval_split(self, x, n, split):\n        pi = self.pi_train if split == \"train\" else self.pi_test\n        z = self.sample_z(n, pi)\n        p = self.p_correct(x, z, split)\n        y = self.rng.binomial(1, p).astype(np.int8)\n        return y, z\n\n    def true_test_group_acc(self, x, n=20000):\n        y, z = self.eval_split(x, n, \"test\")\n        g = self.latent_g(z)\n        a0 = y[g == 0].mean() if np.any(g == 0) else 0.0\n        a1 = y[g == 1].mean() if np.any(g == 1) else 0.0\n        return float(a0), float(a1)\n\n\nclass OPROLike:\n    def __init__(self, d=30, K=20, rng=0):\n        self.d, self.K = d, K\n        self.rng = np.random.default_rng(rng)\n        self.hist = []  # list of dicts: x, score\n\n    def propose(self, n, mut=0.15):\n        if not self.hist:\n            return self.rng.integers(0, 2, size=(n, self.d), dtype=np.int8)\n        top = sorted(self.hist, key=lambda r: r[\"score\"], reverse=True)[: min(self.K, len(self.hist))]\n        parents = np.stack([r[\"x\"] for r in top])\n        idx = self.rng.integers(0, len(parents), size=n)\n        xs = parents[idx].copy()\n        flip = self.rng.random(xs.shape) < mut\n        xs[flip] = 1 - xs[flip]\n        return xs\n\n    def keep_topk(self):\n        self.hist = sorted(self.hist, key=lambda r: r[\"score\"], reverse=True)[: self.K]\n\n    def best_x(self):\n        return max(self.hist, key=lambda r: r[\"score\"])[\"x\"]\n\n\ndef score_train(y_tr):\n    return float(y_tr.mean())\n\n\ndef score_gp(y_tr, y_val, lam=0.8):\n    tr = float(y_tr.mean())\n    va = float(y_val.mean())\n    return 0.5 * (tr + va) - lam * abs(tr - va)\n\n\ndef score_savr(y_val, z_val, delta=0.05):\n    \"\"\"Worst-slice anytime-valid LCB over auditable slice family: each metadata bit==0/1 + overall.\"\"\"\n    y_val = y_val.astype(int)\n    z_val = z_val.astype(int)\n\n    # overall slice\n    slices = [(np.ones(len(y_val), dtype=bool), \"all\")]\n    for j in range(z_val.shape[1]):\n        slices.append((z_val[:, j] == 0, f\"z{j}=0\"))\n        slices.append((z_val[:, j] == 1, f\"z{j}=1\"))\n\n    lcb_list = []\n    for mask, _ in slices:\n        n = int(mask.sum())\n        if n == 0:\n            continue\n        mean = float(y_val[mask].mean())\n        lcb_list.append(lcb_hoeffding(mean, n, delta=delta))\n\n    # conservative: if no slice has samples (shouldn't happen), return -inf\n    return float(min(lcb_list)) if lcb_list else -1e9\n\n\ndef run(seed=0, iters=60, batch=32, d=30, m=8, K=20, n_tr=64, n_val0=64, n_val1=256, M=8):\n    env = LatentSliceEnv(d=d, m=m, seed=seed)\n    rng = np.random.default_rng(seed)\n\n    base = OPROLike(d=d, K=K, rng=seed)\n    gp = OPROLike(d=d, K=K, rng=seed + 1)\n    savr = OPROLike(d=d, K=K, rng=seed + 2)\n\n    for _ in range(iters):\n        xs_b = base.propose(batch)\n        xs_g = gp.propose(batch)\n        xs_s = savr.propose(batch)\n\n        # baseline train-only\n        for x in xs_b:\n            ytr, _ = env.eval_split(x, n_tr, \"train\")\n            base.hist.append({\"x\": x.copy(), \"score\": score_train(ytr)})\n        base.keep_topk()\n\n        # GP-OPRO\n        for x in xs_g:\n            ytr, _ = env.eval_split(x, n_tr, \"train\")\n            yva, _ = env.eval_split(x, n_val0, \"val\")\n            gp.hist.append({\"x\": x.copy(), \"score\": score_gp(ytr, yva, lam=0.8)})\n        gp.keep_topk()\n\n        # SAVR-OPRO with 2-stage racing\n        stage1 = []\n        for x in xs_s:\n            ytr, _ = env.eval_split(x, n_tr, \"train\")\n            yva0, zva0 = env.eval_split(x, n_val0, \"val\")\n            s1 = score_savr(yva0, zva0, delta=0.05)\n            stage1.append((x.copy(), ytr, yva0, zva0, s1))\n        stage1.sort(key=lambda t: t[4], reverse=True)\n\n        for i, (x, ytr, yva0, zva0, _) in enumerate(stage1):\n            if i < M:\n                yva1, zva1 = env.eval_split(x, n_val1, \"val\")\n                yva = np.concatenate([yva0, yva1])\n                zva = np.concatenate([zva0, zva1])\n            else:\n                yva, zva = yva0, zva0\n            s = score_savr(yva, zva, delta=0.05)\n            savr.hist.append({\"x\": x.copy(), \"score\": s})\n        savr.keep_topk()\n\n    xb, xg, xs = base.best_x(), gp.best_x(), savr.best_x()\n    a0b, a1b = env.true_test_group_acc(xb)\n    a0g, a1g = env.true_test_group_acc(xg)\n    a0s, a1s = env.true_test_group_acc(xs)\n\n    def pack(a0, a1):\n        return {\n            \"avg\": float(0.5 * (a0 + a1)),\n            \"worst\": float(min(a0, a1)),\n            \"gap\": float(abs(a0 - a1)),\n        }\n\n    return {\"base\": pack(a0b, a1b), \"gp\": pack(a0g, a1g), \"savr\": pack(a0s, a1s)}\n\n\nif __name__ == \"__main__\":\n    outs = [run(seed=s) for s in range(100)]\n\n    def agg(method, key):\n        vals = np.array([o[method][key] for o in outs], dtype=float)\n        return float(vals.mean()), float(vals.std())\n\n    for method in (\"base\", \"gp\", \"savr\"):\n        m, s = agg(method, \"worst\")\n        print(method, \"worst_group_accuracy mean±std:\", round(m, 3), \"±\", round(s, 3))\n\n    for method in (\"base\", \"gp\", \"savr\"):\n        m, _ = agg(method, \"avg\")\n        print(method, \"avg_test_accuracy mean:\", round(m, 3))\n\n    for method in (\"base\", \"gp\", \"savr\"):\n        m, _ = agg(method, \"gap\")\n        print(method, \"group_gap mean:\", round(m, 3))\n",
     "expected_result": "In the latent-slice setting (subgroup labels hidden during optimization, spurious train-only signal correlated with majority metadata), expected outcomes over 100 seeds:\n\n- **Primary (worst_group_accuracy; higher is better):**\n  - OPRO-train: ~0.60 ± 0.06\n  - GP-OPRO:     ~0.65 ± 0.05\n  - **SAVR-OPRO:  ~0.70 ± 0.04**\n\nSecondary (expected trends):\n- Average test accuracy: similar across GP vs SAVR (≈0.74–0.76), indicating SAVR raises the floor more than the mean.\n- Group gap |a0−a1|: train-only highest (≈0.12), GP moderate (≈0.09), SAVR lowest (≈0.05–0.06).\n- Stability: std of worst_group_accuracy reduced by ~20–30% vs train-only due to (i) racing focusing labels on contenders and (ii) anytime-valid bounds reducing “lucky prompt” selection.\n\nIf an oracle-group RR-OPRO baseline is added, SAVR-OPRO is expected to close a substantial fraction of the gap to oracle robustness (e.g., oracle worst_group_accuracy ≈0.72–0.73).",
     "expected_conclusion": "SAVR-OPRO makes prompt optimization both *more socially valuable* and *more methodologically sound* by targeting the realistic setting where (i) harmful brittleness emerges on latent slices and (ii) protected-attribute labels may be missing or unusable. Its novelty is twofold: it replaces “known-group worst-case” with *auditable slice discovery over non-sensitive metadata* (capturing hidden failure pockets), and it uses *anytime-valid confidence sequences* so robustness-oriented selection remains statistically valid under adaptive, budgeted racing and many candidate comparisons—conditions intrinsic to OPRO-style search.\n\nPractically, this yields prompts with higher worst-group accuracy at the same label budget, reducing disparate-impact risk and increasing reliability of automatically optimized prompts when deployed across heterogeneous users/domains."
+  },
+  "experimental_design": {
+    "experiment_summary": "We will run an OPRO-style iterative prompt optimizer on two QA tasks (GSM8K math word problems and ARC-Challenge multiple-choice science QA). The optimizer’s job is to automatically produce a single system prompt/template that makes a fixed target LLM answer questions correctly. The propose→evaluate→retain loop is kept identical across methods (same proposer model, same mutation/proposal policy, same candidate counts). The only change is the candidate *selection/evaluation rule*:\n\n- Baseline (comparative): ranks candidates by overall validation accuracy using naive fixed-time/normal-approx lower-confidence-bounds under adaptive racing.\n- Proposed SAVR-OPRO: ranks candidates by the *worst discovered slice* anytime-valid lower-confidence-bound (confidence sequence), where slices are defined over non-sensitive, auditable metadata z derived from each example (e.g., length bin, number-of-numerals bin, answer-option entropy proxy, presence of units, etc.) plus a small depth-2 decision-tree slice family.\n\nKey experimental trick to test “latent subgroup” robustness without protected labels: for evaluation only, we define an unobserved latent group label g on the test set as an interaction of two metadata bits (e.g., XOR of {long vs short} and {high vs low numeral count}). During optimization, methods see only (correct/incorrect, z) but never g; worst_group_accuracy is computed using g on held-out test.\n\nWorkflow (per dataset, per seed):\n1) Initialize a population of prompt candidates (templates) from a small seed set.\n2) For T iterations, use a proposer LLM to generate/mutate B new candidates from the current top-K.\n3) Evaluate each candidate on a budgeted, two-stage race (n0 examples for all; then allocate n1 additional examples to top-M).\n4) Score candidates using either baseline scoring or SAVR scoring; retain top-K.\n5) After search, evaluate the best prompt on a large held-out test set; compute primary/secondary metrics including worst_group_accuracy.\n\nScale adjusted to fit the provided Runner (1× NVIDIA H200 140GB VRAM, 240GB RAM): we use inference-only (no fine-tuning), a single target model, short outputs (forced-answer format), small candidate batch sizes, and a strict per-iteration label/call budget (two-stage racing). Typical configuration: T=40 iterations, B=24 candidates/iter, n0=24 examples/candidate, n1=96 for promoted prompts, M=6, K=16. This yields ~40*24*24 + 40*6*96 ≈ 23k example-evaluations per dataset per seed. We run 30 seeds (not 100) for statistical power while staying comfortably within single-GPU runtime; seeds can be parallelized across multiple jobs if available.",
+    "runner_config": {
+      "runner_label": [
+        "self-hosted",
+        "gpu-runner"
+      ],
+      "description": "NVIDIA H200, VRAM: 140 GB, RAM: 240 GB"
+    },
+    "evaluation_metrics": [
+      {
+        "name": "worst_group_accuracy",
+        "description": "**What counts as correct:**\n- GSM8K: Extract the final numeric answer from the model output (last number after normalization); correct if it matches the ground-truth integer exactly. If the dataset contains non-integers, compare as rational/float with tolerance 1e-3 after canonicalization.\n- ARC-Challenge: Model must output a single option label in {A,B,C,D}; correct if it equals the gold answerKey.\n\n**How to compute:**\n1) Define a *latent* group label g_i on the test set only: g_i = XOR(b1_i, b2_i), where b1 and b2 are two binary metadata features derived from non-sensitive signals (e.g., b1=1 if token_length≥median, b2=1 if numeral_count≥median).\n2) Compute per-group accuracy: a_g = (1/|{i:g_i=g}|) * Σ 1[pred_i correct].\n3) worst_group_accuracy = min(a_0, a_1).\n\n**Why appropriate:** Directly measures robustness to an *unknown* subgroup/slice that is not explicitly optimized over, matching the hypothesis about latent slice brittleness.\n\n**Visualizations:**\n- Bar chart of a_0 and a_1 with min highlighted.\n- Box/violin plot of worst_group_accuracy across random seeds per method.\n- Scatter of (avg_accuracy, worst_group_accuracy) to show mean-vs-floor tradeoff."
+      },
+      {
+        "name": "average_test_accuracy",
+        "description": "**Correctness criteria:** same as above per dataset.\n\n**How to compute:** avg = (1/N) * Σ 1[pred_i correct] over the full held-out test set.\n\n**Why appropriate:** Checks whether robustness improvements come at the cost of overall capability.\n\n**Visualizations:**\n- Mean ± 95% CI across seeds.\n- Scatter of average_test_accuracy vs group_gap."
+      },
+      {
+        "name": "group_gap",
+        "description": "**Correctness criteria:** same as above.\n\n**How to compute:** Using the evaluation-only latent group g: group_gap = |a_0 − a_1|.\n\n**Why appropriate:** Captures disparity/brittleness magnitude; complements worst_group_accuracy.\n\n**Visualizations:**\n- Distribution (histogram/violin) of group_gap across seeds.\n- Paired plot per seed (baseline vs SAVR) to show consistent reduction."
+      },
+      {
+        "name": "label_budget_used",
+        "description": "**Correctness criteria:** not applicable (resource metric).\n\n**How to compute:** Count total number of example-evaluations (model calls) used during search:\nlabels = Σ_{candidates} n_eval(candidate), including both race stages.\nReport per dataset and method; ensure methods are matched or report achieved metric per fixed budget.\n\n**Why appropriate:** The hypothesis is explicitly about label-budgeted selection under adaptive evaluation.\n\n**Visualizations:**\n- Line plot of best-so-far worst_group_accuracy vs cumulative labels during search (label-efficiency curve)."
+      },
+      {
+        "name": "anytime_valid_lcb_coverage",
+        "description": "**Correctness criteria:** A lower confidence bound (LCB) has valid coverage if P(true_accuracy ≥ LCB_t for all stopping times t) ≥ 1−δ.\n\n**How to compute (empirical diagnostic):**\nFor each method’s reported LCBs during racing (overall and per-slice):\n1) For each candidate prompt p and slice S, at each evaluation time t (after each batch), compute LCB_t(p,S).\n2) Estimate the slice’s true accuracy on a very large Monte-Carlo sample (or full validation set) a*(p,S).\n3) Count violations V = #{(p,S,t): a*(p,S) < LCB_t(p,S)}.\n4) Report violation rate V / total_checks. (This is a diagnostic, not a formal proof.)\n\n**Why appropriate:** Directly tests the claim that SAVR’s confidence sequences remain well-calibrated under optional stopping/adaptive racing, unlike naive bounds.\n\n**Visualizations:**\n- Reliability plot: empirical violation rate vs target δ.\n- Heatmap of violations by slice type (length, numeral_count, etc.)."
+      }
+    ],
+    "models_to_use": [
+      "Qwen3-4B (4B parameters)",
+      "Qwen3-8B (8B parameters)"
+    ],
+    "datasets_to_use": [
+      "gsm8k",
+      "ARC"
+    ],
+    "proposed_method": {
+      "method_name": "SAVR-OPRO (Slice-Adaptive, Anytime-Valid Racing)",
+      "description": "Inference-time replacement for OPRO candidate selection: score each prompt by the minimum (worst) slice-level anytime-valid lower confidence bound over an auditable slice family built from non-sensitive metadata/derived features (e.g., length bins, numeral density, option-structure) plus depth-2 decision stumps/trees. Uses confidence sequences (stitched Hoeffding or empirical-Bernstein) with a union-bound allocation of δ across candidates×slices×time, enabling statistically meaningful selection under adaptive racing and many comparisons—without protected-attribute labels.",
+      "optuna_config": {
+        "enabled": true,
+        "n_trials": 20,
+        "search_spaces": [
+          {
+            "param_name": "race_n0",
+            "distribution_type": "int",
+            "low": 12.0,
+            "high": 48.0
+          },
+          {
+            "param_name": "race_n1",
+            "distribution_type": "int",
+            "low": 48.0,
+            "high": 192.0
+          },
+          {
+            "param_name": "promote_M",
+            "distribution_type": "int",
+            "low": 4.0,
+            "high": 10.0
+          },
+          {
+            "param_name": "delta_total",
+            "distribution_type": "loguniform",
+            "low": 0.001,
+            "high": 0.1
+          },
+          {
+            "param_name": "slice_family",
+            "distribution_type": "categorical",
+            "choices": [
+              "single_feature",
+              "single_feature+depth2_tree"
+            ]
+          },
+          {
+            "param_name": "cs_type",
+            "distribution_type": "categorical",
+            "choices": [
+              "stitched_hoeffding",
+              "empirical_bernstein_cs"
+            ]
+          }
+        ]
+      }
+    },
+    "comparative_methods": [
+      {
+        "method_name": "Naive-Racing OPRO (mean-accuracy + fixed-time LCB)",
+        "description": "Standard OPRO-style prompt search with the same proposer/mutation loop and the same two-stage racing budget, but ranks candidates by overall validation accuracy using non-anytime, fixed-time bounds (e.g., normal approximation or simple Hoeffding at the final n) and no explicit union correction across adaptive comparisons/slices. This represents the common implicit-IID selection approach the hypothesis critiques.",
+        "optuna_config": {
+          "enabled": true,
+          "n_trials": 20,
+          "search_spaces": [
+            {
+              "param_name": "race_n0",
+              "distribution_type": "int",
+              "low": 12.0,
+              "high": 48.0
+            },
+            {
+              "param_name": "race_n1",
+              "distribution_type": "int",
+              "low": 48.0,
+              "high": 192.0
+            },
+            {
+              "param_name": "promote_M",
+              "distribution_type": "int",
+              "low": 4.0,
+              "high": 10.0
+            },
+            {
+              "param_name": "lcb_type",
+              "distribution_type": "categorical",
+              "choices": [
+                "normal_approx",
+                "fixed_hoeffding"
+              ]
+            },
+            {
+              "param_name": "delta",
+              "distribution_type": "loguniform",
+              "low": 0.001,
+              "high": 0.1
+            }
+          ]
+        }
+      }
+    ]
   }
 }
